@@ -1,0 +1,103 @@
+// CloneableGameEntity.java
+public interface CloneableGameEntity {
+    CloneableGameEntity cloneEntity();
+}
+
+// Updated Room.java
+public class Room implements CloneableGameEntity {
+    private String description;
+    
+    public Room(String description) {
+        this.description = description;
+    }
+    
+    @Override
+    public CloneableGameEntity cloneEntity() {
+        return new Room(this.description);
+    }
+}
+
+// Updated NPC.java
+public class NPC implements CloneableGameEntity {
+    private String name;
+    private int health;
+    
+    public NPC(String name, int health) {
+        this.name = name;
+        this.health = health;
+    }
+    
+    @Override
+    public CloneableGameEntity cloneEntity() {
+        return new NPC(this.name, this.health);
+    }
+}
+
+// MUDPrototypeDemo.java
+public class MUDPrototypeDemo {
+    public static void main(String[] args) {
+        Room prototypeRoom = new Room("Dark Chamber");
+        NPC prototypeNPC = new NPC("Orc", 100);
+        
+        Room clonedRoom1 = (Room) prototypeRoom.cloneEntity();
+        Room clonedRoom2 = (Room) prototypeRoom.cloneEntity();
+        NPC clonedNPC = (NPC) prototypeNPC.cloneEntity();
+        
+        System.out.println("Original Room: " + prototypeRoom);
+        System.out.println("Cloned Room 1: " + clonedRoom1);
+        System.out.println("Cloned Room 2: " + clonedRoom2);
+        System.out.println("Original NPC: " + prototypeNPC);
+        System.out.println("Cloned NPC: " + clonedNPC);
+    }
+}
+
+// Updated SimpleDungeonBuilder.java with Prototype
+public class SimpleDungeonBuilder implements IDungeonBuilder {
+    private String name;
+    private List<Room> rooms = new ArrayList<>();
+    private List<NPC> npcs = new ArrayList<>();
+
+    @Override
+    public IDungeonBuilder setDungeonName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    @Override
+    public IDungeonBuilder addRoom(Room room) {
+        rooms.add(room);
+        return this;
+    }
+
+    public IDungeonBuilder addClonedRoom(Room prototype) {
+        rooms.add((Room) prototype.cloneEntity());
+        return this;
+    }
+
+    @Override
+    public IDungeonBuilder addNPC(NPC npc) {
+        npcs.add(npc);
+        return this;
+    }
+
+    @Override
+    public Dungeon build() {
+        return new Dungeon(name, rooms, npcs);
+    }
+}
+
+// MUDCombinedDemo.java
+public class MUDCombinedDemo {
+    public static void main(String[] args) {
+        Room prototypeRoom = new Room("Stone Chamber");
+        Dungeon dungeon = new SimpleDungeonBuilder()
+                .setDungeonName("Ancient Dungeon")
+                .addRoom(prototypeRoom)
+                .addClonedRoom(prototypeRoom)
+                .addClonedRoom(prototypeRoom)
+                .addNPC(new NPC("Guardian", 150))
+                .build();
+        
+        dungeon.display();
+    }
+}
